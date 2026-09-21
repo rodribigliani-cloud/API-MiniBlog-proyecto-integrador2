@@ -1,0 +1,122 @@
+openapi: 3.1.1
+info:
+  title: Blog API
+  version: 1.0.0
+  description: API REST para gestionar autores y posts de un blog.
+  contact:
+    name: Rodrigo Bigliani
+    email: rodribigliani@gmail.com 
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+  - url: https://produccion.blog.com
+    description: Servidor de producción
+
+paths:
+  /api/authors:
+    get:
+      summary: Obtener todos los autores
+      description: Devuelve una lista de todos los autores registrados en el blog.
+      responses:
+        '200':
+          description: Lista de autores obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    email: 
+                      type: string
+                  $ref: '#/components/schemas/Author'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: crea un nuevo autor 
+      tags:
+        - Autores
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: object
+            required:
+              - name
+              - email
+            properties:
+              name:
+                type: string
+                description: Nombre del autor.
+              email:
+                type: string
+                format: email
+                description: Correo electrónico del autor (debe ser unico).
+              bio:
+                type: string
+                description: Biografia del autor (opcional).
+responses: 
+  '201':
+    description: Autor creado correctamente
+    content:
+      application/json:
+        schema:
+          type : object
+          properties:
+            id: 
+              type: interger
+            name: 
+              type: string
+            email:
+              type: string
+            bio: 
+              type: string
+  '400':
+    description: Solicitud incorrecta. El cuerpo de la solicitud no es válido o falta información requerida.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/error'
+  '409':
+    description: Conflicto. El correo electrónico proporcionado ya está en uso por otro autor.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/error'    
+components:
+  schemas:
+    Author:
+      type: object
+      propertties:
+        id:
+          type: integer
+          description: Id único del autor.
+        name:
+          type : string
+          description: Nombre del autor.
+        email:
+          type : string
+          format: email
+          description: Coreo electronico del Autor.
+        bio:
+          type: string
+          description: Biografia del autor
+        created_at:
+          type: sting
+          format: date-time
+          description: Fecha de cracion
+    error: 
+      type: object
+      properties:
+        errror:
+          type: string
+          description: Mensaje de error.
