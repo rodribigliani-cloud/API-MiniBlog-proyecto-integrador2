@@ -10,7 +10,8 @@ info:
 servers:
   - url: http://localhost:3000
     description: Servidor local de desarrollo
-
+  - url: https://api-miniblog-proyecto-integrador2-production.up.railway.app/health
+    description: Servidor de producción
 tags:
   - name: Health
     description: Endpoints de estado del servidor
