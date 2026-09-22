@@ -1,23 +1,54 @@
 openapi: 3.1.1
 info:
-  title: Blog API
+  title: MiniBlog API
   version: 1.0.0
-  description: API REST para gestionar autores y posts de un blog.
+  description: API REST para gestionar autores y publicaciones de un blog.
   contact:
     name: Rodrigo Bigliani
-    email: rodribigliani@gmail.com 
+    email: rodribigliani@gmail.com
 
 servers:
   - url: http://localhost:3000
     description: Servidor local de desarrollo
-  - url: https://produccion.blog.com
-    description: Servidor de producción
+
+tags:
+  - name: Health
+    description: Endpoints de estado del servidor
+  - name: Authors
+    description: Gestión de autores
+  - name: Posts
+    description: Gestión de publicaciones
 
 paths:
-  /api/authors:
+  /health:
     get:
+      tags:
+        - Health
+      summary: Verificar estado del servidor
+      responses:
+        '200':
+          description: Servidor operativo.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    format: double
+
+  /authors:
+    get:
+      tags:
+        - Authors
       summary: Obtener todos los autores
-      description: Devuelve una lista de todos los autores registrados en el blog.
+      description: Devuelve la lista de autores ordenada por id.
       responses:
         '200':
           description: Lista de autores obtenida correctamente.
@@ -26,97 +57,422 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
-                    email: 
-                      type: string
                   $ref: '#/components/schemas/Author'
         '500':
-          description: Error interno del servidor.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
+          $ref: '#/components/responses/InternalServerError'
+
     post:
-      summary: crea un nuevo autor 
       tags:
-        - Autores
+        - Authors
+      summary: Crear un autor
       requestBody:
         required: true
         content:
           application/json:
-            schema: object
-            required:
-              - name
-              - email
-            properties:
-              name:
-                type: string
-                description: Nombre del autor.
-              email:
-                type: string
-                format: email
-                description: Correo electrónico del autor (debe ser unico).
-              bio:
-                type: string
-                description: Biografia del autor (opcional).
-responses: 
-  '201':
-    description: Autor creado correctamente
-    content:
-      application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '201':
+          description: Autor creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /authors/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags:
+        - Authors
+      summary: Obtener autor por id
+      responses:
+        '200':
+          description: Autor encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Authors
+      summary: Actualizar un autor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '200':
+          description: Autor actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Authors
+      summary: Eliminar un autor
+      responses:
+        '200':
+          description: Autor eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Obtener todas las publicaciones
+      description: Devuelve todas las publicaciones con el nombre y email del autor relacionado.
+      responses:
+        '200':
+          description: Lista de publicaciones obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Posts
+      summary: Crear una publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInput'
+      responses:
+        '201':
+          description: Publicación creada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags:
+        - Posts
+      summary: Obtener publicación por id
+      responses:
+        '200':
+          description: Publicación encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Posts
+      summary: Actualizar una publicación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Publicación actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Posts
+      summary: Eliminar una publicación
+      responses:
+        '200':
+          description: Publicación eliminada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts/author/{authorId}:
+    parameters:
+      - name: authorId
+        in: path
+        required: true
+        description: Identificador del autor.
         schema:
-          type : object
-          properties:
-            id: 
-              type: interger
-            name: 
-              type: string
-            email:
-              type: string
-            bio: 
-              type: string
-  '400':
-    description: Solicitud incorrecta. El cuerpo de la solicitud no es válido o falta información requerida.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/error'
-  '409':
-    description: Conflicto. El correo electrónico proporcionado ya está en uso por otro autor.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/error'    
+          type: integer
+          example: 1
+
+    get:
+      tags:
+        - Posts
+      summary: Obtener publicaciones por autor
+      description: Devuelve al autor y todas sus publicaciones asociadas.
+      responses:
+        '200':
+          description: Publicaciones del autor obtenidas correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/Author'
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Identificador único del recurso.
+      schema:
+        type: integer
+        example: 1
+
+  responses:
+    BadRequest:
+      description: La solicitud tiene datos inválidos o incompletos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: El recurso solicitado no existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: El recurso ya existe o hay un conflicto con los datos enviados.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: Error interno del servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
   schemas:
     Author:
       type: object
-      propertties:
+      required:
+        - id
+        - name
+        - email
+      properties:
         id:
           type: integer
-          description: Id único del autor.
+          example: 1
         name:
-          type : string
-          description: Nombre del autor.
+          type: string
+          example: Ana Gómez
         email:
-          type : string
+          type: string
           format: email
-          description: Coreo electronico del Autor.
+          example: ana@example.com
         bio:
           type: string
-          description: Biografia del autor
+          nullable: true
+          example: Escribo artículos sobre tecnología.
         created_at:
-          type: sting
+          type: string
           format: date-time
-          description: Fecha de cracion
-    error: 
+          example: '2026-09-21T12:00:00Z'
+
+    AuthorInput:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          description: Nombre del autor.
+          example: Ana Gómez
+        email:
+          type: string
+          format: email
+          description: Correo electrónico único del autor.
+          example: ana@example.com
+        bio:
+          type: string
+          nullable: true
+          description: Biografía opcional del autor.
+          example: Escribo artículos sobre tecnología.
+
+    Post:
+      type: object
+      required:
+        - id
+        - title
+        - content
+        - author_id
+        - published
+      properties:
+        id:
+          type: integer
+          example: 10
+        title:
+          type: string
+          example: Primer post del blog
+        content:
+          type: string
+          example: Este es el contenido de la publicación.
+        author_id:
+          type: integer
+          example: 1
+        published:
+          type: boolean
+          example: true
+        author_name:
+          type: string
+          example: Ana Gómez
+        author_email:
+          type: string
+          format: email
+          example: ana@example.com
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-09-21T12:00:00Z'
+
+    PostInput:
+      type: object
+      required:
+        - title
+        - content
+        - author_id
+      properties:
+        title:
+          type: string
+          description: Título de la publicación.
+          example: Primer post del blog
+        content:
+          type: string
+          description: Contenido de la publicación.
+          example: Este es el contenido de la publicación.
+        author_id:
+          type: integer
+          description: Identificador del autor que crea la publicación.
+          example: 1
+        published:
+          type: boolean
+          description: Indica si la publicación está publicada.
+          default: false
+          example: false
+
+    PostUpdate:
       type: object
       properties:
-        errror:
+        title:
           type: string
-          description: Mensaje de error.
+          example: Título actualizado
+        content:
+          type: string
+          example: Contenido actualizado
+        author_id:
+          type: integer
+          example: 2
+        published:
+          type: boolean
+          example: true
+
+    SuccessMessage:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Autor eliminado correctamente
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Mensaje descriptivo del error.
+          example: el autor no existe
