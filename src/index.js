@@ -1,7 +1,7 @@
 import express from 'express';
-import authorsRouter from '../routes/users.js';
-import postsRouter from '../routes/post.js';
-import errorHandler from '../middlewares/errorHandler.js';
+import authorsRouter from './routes/users.js';
+import postsRouter from './routes/post.js';
+import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

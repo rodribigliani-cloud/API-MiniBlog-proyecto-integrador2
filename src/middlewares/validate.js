@@ -72,11 +72,12 @@ export const validatePostPayload = async (req, res, next) => {
 };
 
 export const validateIdParam = (req, res, next) => {
-    const { id } = req.params;
+    const { id, authorId } = req.params;
+    const value = id ?? authorId;
 
-    if (!id || Number.isNaN(Number(id))) {
-    return res.status(400).json({ message: 'el id no es valido' });
-}
+    if (!value || Number.isNaN(Number(value))) {
+        return res.status(400).json({ message: 'el id no es valido' });
+    }
 
     return next();
 };
