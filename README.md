@@ -202,8 +202,17 @@ npm start
 ```text
 https://TU-DOMINIO.up.railway.app/health
 ```
+Endpoints.
+  
+  https://api-miniblog-proyecto-integrador2-production.up.railway.app/health
+  La respuesta debe contener `"status": "ok"`.
+  
+  https://api-miniblog-proyecto-integrador2-production.up.railway.app/authors
+La respuesta debe contener "authores".
+  
+  https://api-miniblog-proyecto-integrador2-production.up.railway.app/posts
+La respuesta debe contener "posts"
 
-La respuesta debe contener `"status": "ok"`.
 
 ## Estructura del proyecto
 
@@ -219,7 +228,151 @@ MiniBlog/
 ├── package.json
 └── vitest.config.js
 ```
+--------------------------------------------------------------
+        ---- AI---------
+estas son algunas preguntas que le fui dando, me maneje mas con consulta de errores..
 
-## Licencia
+ pregunta numero 1 a la AI
 
-ISC
+1 Como hacer un supertest.explicamelo de manera simple y bien.dame unos ejemplos cortos
+ 
+*Respuesta
+¿Qué es Supertest?
+Supertest sirve para probar automáticamente las rutas de tu API.
+Por ejemplo, en lugar de entrar manualmente a Thunder Client y hacer:
+GET /authors
+
+Supertest puede hacerlo automáticamente mediante código.
+
+mportar Supertest y tu API
+import request from "supertest";
+import app from "../src/index.js";
+
+Aquí:
+- request → permite hacer peticiones HTTP.
+- app → es tu aplicación Express.
+4. Probar un GET
+Supongamos que tienes:
+app.get("/authors", (req, res) => {
+    res.json([
+        { id: 1, name: "Gabriel García Márquez" }
+    ]);
+});
+
+El test sería:
+import request from "supertest";
+import app from "../src/index.js";
+
+it("debe obtener los autores", async () => {
+
+    const res = await request(app)
+        .get("/authors");
+
+    expect(res.status).toBe(200);
+});
+
+
+¿Qué hace?
+request(app)
+
+Usa tu API.
+.get("/authors")
+
+Hace un GET.
+expect(res.status).toBe(200)
+
+Comprueba que la respuesta sea 200.
+5. Probar un POST
+Por ejemplo:
+it("debe crear un autor", async () => {
+
+    const res = await request(app)
+        .post("/authors")
+        .send({
+            name: "Usuario Test",
+            email: "test@example.com"
+        });
+
+    expect(res.status).toBe(201);
+});
+
+La parte:
+.send({
+    name: "Usuario Test",
+    email: "test@example.com"
+})
+
+envía los datos a tu API.
+6. Probar un GET por ID
+it("debe obtener un autor", async () => {
+
+    const res = await request(app)
+        .get("/authors/1");
+
+    expect(res.status).toBe(200);
+});
+
+7. Comprobar el contenido
+También puedes comprobar los datos:
+expect(res.body.name).toBe("Usuario Test");
+
+Por ejemplo:
+const res = await request(app)
+    .get("/authors/1");
+
+expect(res.status).toBe(200);
+expect(res.body.id).toBe(1);
+
+8. Ejecutar los tests
+Si tienes Vitest instalado:
+npx vitest run
+
+O puedes agregar en package.json:
+"scripts": {
+    "test": "vitest"
+}
+
+Y ejecutar:
+npm test
+
+La idea más importante
+Piensa en Supertest así:
+Supertest
+   ↓
+Hace petición
+   ↓
+Tu API Express
+   ↓
+Recibe respuesta
+   ↓
+Supertest comprueba resultado
+
+Ejemplo súper corto
+const res = await request(app)
+    .get("/authors");
+
+expect(res.status).toBe(200);
+
+Significa:
+"Haz GET a /authors y comprueba que responda 200."
+
+Y para POST:
+const res = await request(app)
+    .post("/authors")
+    .send({
+        name: "Juan",
+        email: "juan@example.com"
+    });
+
+expect(res.status).toBe(201);
+
+"Crea un autor y comprueba que se haya creado correctamente."
+
+Pregunta 2
+que quiere decir esto? explicamelo en un solo punto posts: id, author_id (FK -> users.id), title, content, published created_at 
+
+*Respuesta
+ Significa que estás definiendo una tabla posts (publicaciones) con estos campos:
+posts: id, author_id (FK → users.id), title, content, published, created_at
+👉 En un solo punto: cada publicación tiene un id para identificarla, un author_id que indica qué usuario la creó (relacionado con users.id), un title como título, content para el contenido, published para saber si está publicada o no, y created_at para guardar la fecha de creación.
+
